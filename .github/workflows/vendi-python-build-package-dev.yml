@@ -50,11 +50,11 @@ jobs:
         run: |
           if [ "${{ github.ref }}" = "refs/heads/main" ]; then
             VERSION="master.$(git rev-parse --short HEAD)"
-          else:
+          else
             BRANCH_NAME=$(echo ${GITHUB_REF#refs/heads/} | sed 's/\//-/g')
             VERSION=0.0.0.dev-${BRANCH_NAME}
           fi
-            poetry version $VERSION
+          poetry version $VERSION
 
 
       - name: Publish package
