@@ -6,6 +6,10 @@ on:
       version:
         description: 'Version (e.g., 1.0.0)'
         required: true
+  push:
+    tags:
+      - "v*.*.*"
+
 
 jobs:
   release:
