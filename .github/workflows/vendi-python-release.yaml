@@ -33,8 +33,7 @@ jobs:
           git config user.email github-actions@github.com
           git add pyproject.toml
           git commit -m "Update version to $NEW_VERSION"
-          git tag $NEW_VERSION
-          git push origin HEAD:main --tags
+          git push origin HEAD:main
 
       - name: prepare twine
         run: |
