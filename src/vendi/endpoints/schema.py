@@ -7,7 +7,7 @@ from vendi.core.schema import SchemaMixin
 from vendi.deployments.schema import DeploymentStatus
 
 
-class UsableEndpoint(BaseModel):
+class EndpointInfo(BaseModel):
     id: uuid.UUID | str
     """The ID of the endpoint."""
     name: str

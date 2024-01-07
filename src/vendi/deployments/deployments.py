@@ -2,7 +2,7 @@ from typing import List
 
 from vendi.core.http_client import HttpClient
 
-from .schema import Deployment
+from .schema import Deployment, DeploymentStatus
 
 
 class Deployments:
@@ -147,3 +147,12 @@ class Deployments:
             uri=f"deployments/{deployment_id}/stop",
         )
         return Deployment(**res)
+
+    def status(self, deployment_id: str) -> DeploymentStatus:
+        """
+        Get the status of a deployment
+        :param deployment_id: The ID of the deployment to get the status of
+        :return: The status of the deployment
+        """
+        res = self.__client.get(uri=f"deployments/{deployment_id}")
+        return res["status"]

@@ -1,8 +1,8 @@
 from pydantic import BaseModel, ConfigDict
 
 from vendi.core.schema import SchemaMixin
-from vendi.endpoints.schema import UsableEndpoint
-from vendi.models.schema import ImportModelSchema, ModelProvider
+from vendi.endpoints.schema import EndpointInfo
+from vendi.models.schema import ModelInfo, ModelProvider
 
 
 class CreateProviderSchema(BaseModel):
@@ -13,9 +13,9 @@ class CreateProviderSchema(BaseModel):
 
 
 class Provider(CreateProviderSchema, SchemaMixin):
-    models: list[ImportModelSchema] = []
+    models: list[ModelInfo] = []
     """The models that are available for the provider."""
-    endpoints: list[UsableEndpoint] = []
+    endpoints: list[EndpointInfo] = []
     """The endpoints that are available for the provider. Endpoint is the interface that the provider exposes to 
     generate predictions"""
     model_config = ConfigDict(

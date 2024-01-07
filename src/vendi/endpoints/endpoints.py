@@ -1,6 +1,7 @@
 from typing import List
 
 from vendi.core.http_client import HttpClient
+from vendi.deployments.schema import DeploymentStatus
 from vendi.endpoints.schema import Endpoint
 
 
@@ -39,3 +40,10 @@ class Endpoints:
         Delete an endpoint by ID
         """
         return self.__client.delete(uri=f"/{endpoint_id}")
+
+    def status(self, endpoint_id: str) -> DeploymentStatus:
+        """
+        Get the status of an endpoint
+        """
+        res = self.__client.get(uri=f"/{endpoint_id}")
+        return res['status']

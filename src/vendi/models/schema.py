@@ -27,11 +27,13 @@ class ModelProvider(str, Enum):
     """A model that google exposes through its api"""
 
 
-class ImportModelSchema(BaseModel):
-    model_name: str
-    """The name of the model to import."""
-    model_provider: ModelProvider
-    """The provider of the model to import."""
+class ModelInfo(BaseModel):
+    name: str
+    """The name of the model"""
+    source: ModelProvider
+    """The provider of the model"""
+    type_: ModelType
+    """The type of the model"""
     model_config = ConfigDict(
         protected_namespaces=(),
     )

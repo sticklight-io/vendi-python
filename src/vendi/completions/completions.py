@@ -4,6 +4,8 @@ import openai
 
 from vendi.completions.schema import ChatCompletion
 from vendi.core.http_client import HttpClient
+from vendi.endpoints.schema import EndpointInfo
+from vendi.models.schema import ModelProvider
 
 
 class Completions:
@@ -101,8 +103,8 @@ class Completions:
         :return: The generated completions
 
         Examples:
-        >>> from vendi import VendiClient
-        >>> client = VendiClient(api_key="my-api-key")
+        >>> from vendi import Vendi
+        >>> client = Vendi(api_key="my-api-key")
         >>> completions = client.completions.create_batch(
         >>>     model="vendi/mistral-7b-instruct-v2",
         >>>     batch_messages=[
@@ -180,8 +182,8 @@ class Completions:
         :return: The generated completions
 
         Examples:
-        >>> from vendi import VendiClient
-        >>> client = VendiClient(api_key="my-api-key")
+        >>> from vendi import Vendi
+        >>> client = Vendi(api_key="my-api-key")
         >>> completions = client.completions.create_many(
         >>>     models=[
         >>>         "vendi/mistral-7b-instruct-v2",
@@ -223,3 +225,11 @@ class Completions:
             }
         )
         return res
+
+    def available_endpoints(self, provider: ModelProvider) -> List[EndpointInfo]:
+        """
+        Get the list of available endpoints for the completions API
+        :return: The list of available endpoints
+        """
+        res = self.__client.get(uri=f"{provider}/endpoints")
+        return [EndpointInfo(**endpoint) for endpoint in res]

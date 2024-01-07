@@ -5,6 +5,7 @@ This is the main entrypoint for the Vendi SDK.
 from vendi.core.config import vendi_config
 from vendi.datasets import Datasets
 from vendi.endpoints import Endpoints
+from vendi.finetune import Finetune
 from vendi.prompte_templates.prompt_templates import PromptTemplates
 from vendi.deployments.deployments import Deployments
 from vendi.evaluations.evaluation import Evaluations
@@ -15,7 +16,7 @@ from vendi.providers import Providers
 VENDI_API_URL = vendi_config.VENDI_API_URL
 
 
-class VendiClient:
+class Vendi:
     def __init__(
         self,
         *,
@@ -37,3 +38,4 @@ class VendiClient:
         self.completions = Completions(url=self._base_url, api_key=self.api_key)
         self.providers = Providers(url=self._base_url, api_key=self.api_key)
         self.endpoints = Endpoints(url=self._base_url, api_key=self.api_key)
+        self.finetune = Finetune(url=self._base_url, api_key=self.api_key)

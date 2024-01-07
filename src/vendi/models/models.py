@@ -19,6 +19,7 @@ class Models:
         model_provider: ModelProvider,
     ) -> Model:
         """
+        Relevant only for Self-hosted customers.
         Import a model from any of the supported model providers.
         For huggingface, pass the model card name as the model_name.
         """

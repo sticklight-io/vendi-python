@@ -1,6 +1,6 @@
-from vendi import VendiClient
+from vendi import Vendi
 
-client = VendiClient(
+client = Vendi(
     api_key="dev-tenant-api-key"
 )
 

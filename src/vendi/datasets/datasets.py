@@ -1,7 +1,7 @@
 import json
 import logging
 import uuid
-from typing import List, Dict, Union
+from typing import List, Dict, Union, Optional
 
 import pandas as pd
 
@@ -61,7 +61,8 @@ class Datasets:
     def upload(
         self,
         name: str,
-        data: List[dict],
+        data: Optional[List[dict]] = None,
+        data_path: Optional[str] = None,
         tags: Union[Dict, None] = None,
         path: Union[str, None] = None,
         dataset_type: Union[DatasetType, None] = None,
@@ -70,6 +71,7 @@ class Datasets:
         Upload a dataset to the Vendi API
         :param name: The name of the dataset
         :param data: The data to upload. Should be a valid list of JSON objects
+        :param data_path: The path to the data to upload. Should be a valid path to a JSON file
         :param tags: The tags to apply to the dataset. Should be a dictionary of key/value pairs. For example:
         {"version": "v3", "language": "en"}
         :param path: The path to the dataset. Should be a string, for example: "datasets/financial". Defaults to None
@@ -78,6 +80,16 @@ class Datasets:
         :return: The ID of the uploaded dataset
 
         """
+        if not data and not data_path:
+            raise ValueError("You must provide either data or data_path when uploading data")
+
+        if data_path:
+            with open(data_path, "r") as f:
+                try:
+                    data = [json.loads(line) for line in f.read().splitlines()]
+                except json.decoder.JSONDecodeError:
+                    raise ValueError(f"Could not parse JSON from {data_path} file. The file must be a valid JSONL file")
+
         if tags is None:
             tags = {}
         str_data = ""

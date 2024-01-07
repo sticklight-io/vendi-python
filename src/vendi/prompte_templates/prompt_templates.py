@@ -22,8 +22,8 @@ class PromptTemplates:
 
         Example:
         ```
-        >>> from vendi import VendiClient
-        >>> client = VendiClient(api_key="my_api_key")
+        >>> from vendi import Vendi
+        >>> client = Vendi(api_key="my_api_key")
         >>> template = client.prompt_templates.create(
         ...     name="My Prompt Template",
         ...     prompt_template="Given the following conversation between a customer and a support agent, write a response from the support agent. {chat_history}",
