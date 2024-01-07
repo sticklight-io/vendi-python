@@ -26,14 +26,14 @@ jobs:
         run: curl -sSL https://install.python-poetry.org | python3 -
 
       - name: Update version, tag, and commit
-        run: |
-          VERSION=${{ github.event.inputs.version }}
-          poetry version $VERSION
+        run: |          
+          poetry version patch
+          NEW_VERSION=$(poetry version -s)
           git config user.name github-actions
           git config user.email github-actions@github.com
           git add pyproject.toml
-          git commit -m "Release version $VERSION"
-          git tag $VERSION
+          git commit -m "Update version to $NEW_VERSION"
+          git tag $NEW_VERSION
           git push origin HEAD:main --tags
 
       - name: Publish package to PyPI
