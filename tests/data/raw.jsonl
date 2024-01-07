@@ -1,0 +1,4 @@
+{"input": "I just received a job offer at a tech startup located in the bustling neighborhood of Manhattan with the zipcode 10001.", "label": "zipcode", "value": "10001", "source": "moackaroo + gpt4"}
+{"input": "Ever since I watched \"Beverly Hills, 90210,\" I've been curious about the lifestyles of those living in one of America's most famous zip codes.", "label": "zipcode", "value": "90210", "source": "moackaroo + gpt4"}
+{"input": "The corporate headquarters for the fashion company is located in the bustling district of Manhattan with the zip code 10018.", "label": "zipcode", "value": "10018", "source": "moackaroo + gpt4"}
+{"input": "The new office building is located in the bustling heart of Manhattan, with the zipcode 10001.", "label": "zipcode", "value": "10001", "source": "moackaroo + gpt4"}

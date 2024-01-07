@@ -1,0 +1,41 @@
+name: Manual Release to PyPI
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version (e.g., 1.0.0)'
+        required: true
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install Poetry
+        run: curl -sSL https://install.python-poetry.org | python3 -
+
+      - name: Update version, tag, and commit
+        run: |
+          VERSION=${{ github.event.inputs.version }}
+          poetry version $VERSION
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add pyproject.toml
+          git commit -m "Release version $VERSION"
+          git tag $VERSION
+          git push origin HEAD:main --tags
+
+      - name: Publish package to PyPI
+        run: |
+          poetry build
+          twine upload dist/* -u __token__ -p ${{ secrets.PYPI_TOKEN }}
+
+      - name: Finish
+        run: echo "Package version $VERSION published to PyPI successfully"
