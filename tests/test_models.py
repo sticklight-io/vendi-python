@@ -13,7 +13,7 @@ def test_models(vendi_client):
     assert res is True
     with pytest.raises(HTTPError) as exc:
         vendi_client.models.get(get_new_model.id)
-    assert exc.value.response.status_code == 409
+    assert exc.value.response.status_code == 404
 
 
 def test_set_model_public(vendi_client):

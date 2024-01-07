@@ -66,4 +66,4 @@ def test_deployments(vendi_client):
     assert res is True
     with pytest.raises(HTTPError) as exc:
         vendi_client.deployments.get(get_new_deployment.id)
-    assert exc.value.response.status_code == 409
+    assert exc.value.response.status_code == 404

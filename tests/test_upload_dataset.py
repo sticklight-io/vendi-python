@@ -18,6 +18,8 @@ def test_upload_dataset_get_load_and_delete_it(vendi_client):
 
     uploaded_data = dataset.load_data()
     assert len(uploaded_data) == len(data_jsonl)
+    vendi_client.datasets.delete(dataset_id)
+
     with pytest.raises(HTTPError) as exc:
-        vendi_client.datasets.delete(dataset_id)
-    assert exc.value.response.status_code == 409
+        vendi_client.datasets.get(dataset_id)
+    assert exc.value.response.status_code == 404
