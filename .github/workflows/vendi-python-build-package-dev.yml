@@ -7,15 +7,16 @@ on:
     tags-ignore:
       - '*'
 
+permissions:
+  contents: 'read'
+  id-token: 'write'
+
 env:
   PACKAGE_NAME: vendi
 jobs:
   publish:
     runs-on: ubuntu-latest
 
-    permissions:
-      contents: 'read'
-      id-token: 'write'
 
     steps:
       - name: Checkout code
@@ -28,13 +29,11 @@ jobs:
 
       - name: Install Poetry
         run: |
-          echo ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }} > /tmp/service_account_key.json
-          cat /tmp/service_account_key.json
           curl -sSL https://install.python-poetry.org | python3 -
 
       - name: Authenticate with Google Cloud
         id: auth
-        uses: 'google-github-actions/auth@v2'
+        uses: 'google-github-actions/auth@v1'
         with:
           token_format: access_token
           workload_identity_provider: 'projects/990378349455/locations/global/workloadIdentityPools/identity-pool/providers/github-provider'
