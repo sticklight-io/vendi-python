@@ -2,7 +2,7 @@
 name = "vendi"
 version = "0.1.5"
 description = ""
-authors = ["Aviv.a <avivex1000@gmail.com>"]
+authors = ["Aviv.a <aviv@vendi-ai.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
