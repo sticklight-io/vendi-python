@@ -36,6 +36,11 @@ jobs:
           git tag $NEW_VERSION
           git push origin HEAD:main --tags
 
+      - name: prepare twine
+        run: |
+          rm -rf dist
+          pip3 install twine
+
       - name: Publish package to PyPI
         run: |
           poetry build
