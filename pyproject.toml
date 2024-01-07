@@ -3,6 +3,9 @@ name = "vendi"
 version = "0.1.8"
 description = ""
 authors = ["Aviv.a <aviv@vendi-ai.com>"]
+packages = [
+    { include = "vendi", from = "src" },
+]
 readme = "README.md"
 
 [tool.poetry.dependencies]

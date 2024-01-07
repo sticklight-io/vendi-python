@@ -1,7 +1,7 @@
 import uuid
 from enum import Enum
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 from vendi.core.schema import SchemaMixin
 from vendi.deployments.schema import DeploymentStatus
@@ -39,6 +39,9 @@ class CreateEndpointSchema(SchemaMixin):
     model_id: uuid.UUID | None = None  # For fine-tune endpoints
     """The ID of the model to use for the endpoint. This value shows the model id that runs within the deployment id."""
 
+    model_config = ConfigDict(
+        protected_namespaces=(),
+    )
 
 class Endpoint(CreateEndpointSchema):
     provider: str | None = None

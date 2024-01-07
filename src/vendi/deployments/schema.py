@@ -71,3 +71,7 @@ class Deployment(SchemaMixin):
     """The deployment configuration of the deployment."""
     status: DeploymentStatus
     """The status of the deployment."""
+
+    model_config = ConfigDict(
+        protected_namespaces=(),
+    )
