@@ -47,7 +47,6 @@ jobs:
           pip3 install twine
 
       - name: Update version for dev branch
-        if: github.ref != 'refs/heads/main'
         run: |
           if [ "${{ github.ref }}" = "refs/heads/main" ]; then
             VERSION="master.$(git rev-parse --short HEAD)"
