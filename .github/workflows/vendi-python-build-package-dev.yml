@@ -28,7 +28,8 @@ jobs:
 
       - name: Install Poetry
         run: |
-          echo ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
+          echo ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }} > /tmp/service_account_key.json
+          cat /tmp/service_account_key.json
           curl -sSL https://install.python-poetry.org | python3 -
 
       - name: Authenticate with Google Cloud
