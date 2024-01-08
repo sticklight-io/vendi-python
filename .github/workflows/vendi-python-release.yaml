@@ -2,10 +2,6 @@ name: Manual Release to PyPI
 
 on:
   workflow_dispatch:
-    inputs:
-      version:
-        description: 'Version (e.g., 1.0.0)'
-        required: true
   push:
     tags:
       - "*.*.*"
