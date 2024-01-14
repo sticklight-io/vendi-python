@@ -16,7 +16,7 @@ print(models)
 finetune_job = client.finetune.run(
     run_name="my-first-finetune",
     model_description="My first finetune",
-    model_name="vendi/mistralai/Mistral-7B-Instruct-v0.2",
+    model_name=models[0].name,
     dataset_id=dataset_id
 )
 

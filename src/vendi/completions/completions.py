@@ -73,7 +73,7 @@ class Completions:
             uri=f"completions/",
             json_data=data
         )
-        return res
+        return ChatCompletion(**res)
 
     def create_batch(
         self,
@@ -232,4 +232,4 @@ class Completions:
         :return: The list of available endpoints
         """
         res = self.__client.get(uri=f"{provider}/endpoints")
-        return [EndpointInfo(**endpoint) for endpoint in res]
+        return [EndpointInfo(**endpoint) for endpoint in res[provider]]

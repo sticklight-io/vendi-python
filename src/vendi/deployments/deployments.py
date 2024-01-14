@@ -58,7 +58,7 @@ class Deployments:
         max_model_len: int,
         scale_to_zero: bool = True,
         scale_to_zero_timeout_seconds: int = 900,
-        quantize: str = None,
+        quantization: str = None,
     ) -> Deployment:
         """
         Create a deployment on vendi with the given parameters
@@ -74,7 +74,7 @@ class Deployments:
         A deployment not in use is defined by the deployment not receiving any requests for the scale_to_zero_timeout_seconds.
         :param scale_to_zero_timeout_seconds: The number of seconds to wait before scaling the deployment to zero when it is not in use.
         This value must be between 0 and inf.
-        :param quantize: The quantization to use for the deployment. Please see the vendi documentation for a list of supported quantizations.
+        :param quantization: The quantization to use for the deployment. Please see the vendi documentation for a list of supported quantizations.
         :return: The created deployment metadata
         """
         res = self.__client.post(
@@ -87,7 +87,7 @@ class Deployments:
                     "dtype": dtype,
                     "gpu_memory_utilization": str(gpu_memory_utilization),
                     "max_model_len": str(max_model_len),
-                    "quantize": quantize,
+                    "quantization": quantization,
                 },
                 "model_id": model_id,
                 "scale_to_zero": scale_to_zero,

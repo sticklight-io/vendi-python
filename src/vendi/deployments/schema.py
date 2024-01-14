@@ -48,7 +48,7 @@ class ModelConfig(BaseModel):
     """The maximum percentage of GPU memory to use for the model."""
     max_model_len: int = 8192
     """The maximum length of the model to use for the deployment. This value must be between 0 and inf. Make sure this value is suitable for your model card on huggingface."""
-    quantize: str | None = None
+    quantization: str | None = None
     """The quantization to use for the model. Please see the vendi documentation for a list of supported quantizations."""
 
     model_config = ConfigDict(

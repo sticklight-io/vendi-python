@@ -28,8 +28,7 @@ def test_deployments(vendi_client):
         backend="vllm",
         dtype="float16",
         gpu_memory_utilization=0.8,
-        max_model_len=4092,
-        quantize="int4"
+        max_model_len=4092
     )
 
     # Let the install chart finish running
@@ -41,7 +40,7 @@ def test_deployments(vendi_client):
     assert new_deployment.model_configuration.dtype == "float16"
     assert new_deployment.model_configuration.gpu_memory_utilization == 0.8
     assert new_deployment.model_configuration.max_model_len == 4092
-    assert new_deployment.model_configuration.quantize == "int4"
+    assert new_deployment.model_configuration.quantization is None
     assert new_deployment.deploy_configuration.scale_to_zero is True
     assert new_deployment.deploy_configuration.scale_to_zero_timeout_seconds == 900
 
