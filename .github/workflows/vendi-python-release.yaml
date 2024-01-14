@@ -21,17 +21,6 @@ jobs:
       - name: Install Poetry
         run: curl -sSL https://install.python-poetry.org | python3 -
 
-      - name: Update version, tag, and commit
-        run: |
-          poetry version patch
-          NEW_VERSION=$(poetry version -s)
-          git config user.name matankleyman
-          git config user.email matan.k@vendi-ai.com
-          git add pyproject.toml
-          git commit -m "Update version to $NEW_VERSION"
-          git tag $NEW_VERSION
-          git push origin HEAD:main --tags
-
       - name: prepare twine
         run: |
           rm -rf dist
