@@ -31,13 +31,15 @@ class Completions:
         model: str,
         messages: List[Dict[str, str]],
         frequency_penalty: Optional[float] = 0,
-        presence_penalty: Optional[float] = 0,
+        presence_penalty: Optional[float] = 0.5,
         max_tokens: Optional[int] = 256,
         stop: Optional[List[str]] = None,
         n: Optional[int] = 1,
         top_p: Optional[float] = 1,
         top_k: Optional[int] = 40,
         temperature: Optional[float] = 0.7,
+        json_schema: Optional[str] = None,
+        regex: Optional[str] = None,
     ) -> ChatCompletion:
         """
         Create a completion on a language model with the given parameters
@@ -51,6 +53,10 @@ class Completions:
         :param top_p: The top p value to use for the completion
         :param top_k: The top k value to use for the completion
         :param temperature: The temperature value to use for the completion
+        :param json_schema: The JSON schema to use for the completion (either this or regex should be provided) .
+        See https://docs.vendi.ai/docs/completions-api#json-schema for more information
+        :param regex: The regex to use for the completion (either this or json_schema should be provided)
+        See https://docs.vendi.ai/docs/completions-api#regex for more information
         :return: The generated completion
 
         """
@@ -64,6 +70,8 @@ class Completions:
             "top_p": top_p,
             "top_k": top_k,
             "temperature": temperature,
+            "json_schema": json_schema,
+            "regex": regex,
         }
 
         if stop is not None:
