@@ -2,10 +2,24 @@ from typing import Optional, Literal
 from pydantic import BaseModel
 
 
+class ImageContentUrl(BaseModel):
+    url: str
+
+
+class ImageContent(BaseModel):
+    type: Literal["image_url"]
+    image_url: ImageContentUrl
+
+
+class TextContent(BaseModel):
+    type: Literal["text"]
+    text: str
+
+
 class LlmMessage(BaseModel):
     role: str
     """The role of the message. Can be `user` or `assistant`."""
-    content: str
+    content: str | list[ImageContent | TextContent]
     """The content of the message."""
 
 
