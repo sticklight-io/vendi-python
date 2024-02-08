@@ -333,10 +333,10 @@ class Completions:
         """
         Returns the status of a batch inference job.
         """
-        job = self._get_batch_job(job_id)
+        job = self.get_batch_job(job_id)
         return job.status
 
-    def _get_batch_job(self, batch_inference_id: uuid.UUID) -> BatchInference:
+    def get_batch_job(self, batch_inference_id: uuid.UUID) -> BatchInference:
         """
         Get a batch inference object job by ID
         """
