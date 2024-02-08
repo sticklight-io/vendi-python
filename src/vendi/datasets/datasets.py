@@ -66,7 +66,7 @@ class Datasets:
         tags: Union[Dict, None] = None,
         path: Union[str, None] = None,
         dataset_type: Union[DatasetType, None] = None,
-    ) -> uuid.UUID:
+    ) -> Dataset:
         """
         Upload a dataset to the Vendi API
         :param name: The name of the dataset
@@ -114,4 +114,13 @@ class Datasets:
                 "path": path,
             }
         )
-        return res["data"]["dataset_id"]
+        return Dataset(**res)
+
+    def generate_download_link(self, dataset_id: str) -> str:
+        """
+        Generate a download link for a dataset
+        :param dataset_id: The ID of the dataset to download
+        :return: The download link
+        """
+        res = self.__client.get(uri=f"/{dataset_id}/download-link")
+        return res
