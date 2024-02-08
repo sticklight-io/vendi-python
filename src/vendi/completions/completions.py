@@ -1,8 +1,9 @@
+import time
+import uuid
 from typing import List, Dict, Optional
 
-import openai
-
-from vendi.completions.schema import ChatCompletion
+from vendi.completions.schema import ChatCompletion, ModelParameters, BatchInference, BatchInferenceStatus, LlmMessage, \
+    CompletionRequest
 from vendi.core.http_client import HttpClient
 from vendi.endpoints.schema import EndpointInfo
 from vendi.models.schema import ModelProvider
@@ -83,10 +84,10 @@ class Completions:
         )
         return ChatCompletion(**res)
 
-    def create_batch(
+    def create_many_prompts(
         self,
         model,
-        batch_messages: List[List[Dict[str, str]]],
+        conversations: List[List[Dict[str, str]]],
         frequency_penalty: Optional[float] = 0,
         presence_penalty: Optional[float] = 0,
         max_tokens: Optional[int] = 256,
@@ -99,7 +100,7 @@ class Completions:
         """
         Create multiple completions on the same model with different prompts, while keeping the same parameters
         :param model: The ID of the language model to use for the completion. Should be in the format of <provider>/<model_id>
-        :param batch_messages: A batch of multiple prompt messages to use for the completions
+        :param conversations: A batch of multiple prompt messages to use for the completions
         :param frequency_penalty: The frequency penalty to use for the completion
         :param presence_penalty: The presence penalty to use for the completion
         :param max_tokens: The maximum number of tokens to generate for the completion
@@ -113,9 +114,9 @@ class Completions:
         Examples:
         >>> from vendi import Vendi
         >>> client = Vendi(api_key="my-api-key")
-        >>> completions = client.completions.create_batch(
+        >>> completions = client.completions.create_many_prompts(
         >>>     model="vendi/mistral-7b-instruct-v2",
-        >>>     batch_messages=[
+        >>>     conversations=[
         >>>         [
         >>>             {
         >>>                 "role": "user",
@@ -131,7 +132,6 @@ class Completions:
         >>>     ],
         >>> )
 
-
         """
 
         requests_body = [
@@ -146,7 +146,7 @@ class Completions:
                 "top_k": top_k,
                 "temperature": temperature,
             }
-            for message in batch_messages
+            for message in conversations
         ]
 
         if stop is not None:
@@ -160,9 +160,51 @@ class Completions:
                 "requests": requests_body
             }
         )
-        return res
+        return [ChatCompletion(**completion) for completion in res]
 
     def create_many(
+        self,
+        requests: list[CompletionRequest],
+    ) -> List[ChatCompletion]:
+        """
+        Create multiple completions on different models with the same prompt and parameters
+        requests: A list of tuples, where each tuple contains the model parameters and the prompt messages
+        Examples:
+        >>> import uuid
+        >>> from vendi.completions.schema import CompletionRequest
+        >>> from vendi import Vendi
+        >>>
+        >>> client = Vendi(api_key="my-api-key")
+        >>> completions = client.completions.create_many(
+        >>>     requests=[
+        >>>         CompletionRequest(
+        >>>             model="openai/gpt-3.5-turbo",
+        >>>             messages=[
+        >>>                 {"role": "user", "content": "Hey how are you?"}
+        >>>             ],
+        >>>             request_id=str(uuid.uuid4()),
+        >>>         ),
+        >>>         CompletionRequest(
+        >>>             model="openai/gpt-4",
+        >>>             messages=[
+        >>>                 {"role": "user", "content": "Hi whats up?"}
+        >>>             ],
+        >>>             request_id=str(uuid.uuid4()),
+        >>>         ),
+        >>>     ]
+        >>> )
+        """
+
+        res = self.__client.post(
+            uri=f"completions-many/",
+            json_data=
+            {
+                "requests": [i.model_dump() for i in requests]
+            }
+        )
+        return [ChatCompletion(**completion) for completion in res]
+
+    def create_many_models(
         self,
         models: List[str],
         messages: List[Dict[str, str]],
@@ -206,6 +248,7 @@ class Completions:
         >>>     ]
         >>> )
         """
+
         requests_body = [
             {
                 "messages": messages,
@@ -232,7 +275,7 @@ class Completions:
                 "requests": requests_body
             }
         )
-        return res
+        return [ChatCompletion(**completion) for completion in res]
 
     def available_endpoints(self, provider: ModelProvider) -> List[EndpointInfo]:
         """
@@ -241,3 +284,63 @@ class Completions:
         """
         res = self.__client.get(uri=f"{provider}/endpoints")
         return [EndpointInfo(**endpoint) for endpoint in res[provider]]
+
+    def run_batch_job(
+        self,
+        dataset_id: uuid.UUID,
+        model_parameters: list[ModelParameters],
+        wait_until_complete: bool = False,
+        timeout: int = 3000,
+        poll_interval: int = 5,
+    ) -> BatchInference:
+        """
+        Run a batch inference job on a dataset using the specified models .
+        :param dataset_id: The ID of the dataset to run the batch inference on
+        :param model_parameters: The list of model parameters to use for the batch inference
+        :param wait_until_complete: Whether to wait until the batch inference job is complete before continuing
+        :param timeout: The maximum time to wait in the client for the batch inference job to complete, in seconds. Valid only if wait_until_complete is True
+        :param poll_interval: The interval at which to poll the batch inference job status, in seconds . Valid only if wait_until_complete is True
+        :return: The batch inference job
+        """
+
+        job = self.__post_batch_job(dataset_id, model_parameters)
+        if wait_until_complete:
+            start_time = time.time()
+            while True:
+                status = self.batch_job_status(job.id)
+                if status in [BatchInferenceStatus.COMPLETED, BatchInferenceStatus.FAILED]:
+                    return job
+                if time.time() - start_time > timeout:
+                    raise TimeoutError(
+                        "The batch job did not complete within the specified timeout. "
+                        "You can still check its status by using the batch_job_status method.")
+
+                time.sleep(poll_interval)
+        return job
+
+    def __post_batch_job(self, dataset_id: uuid.UUID, model_parameters: list[ModelParameters]) -> BatchInference:
+        res = self.__client.post(
+            uri="batch_dataset_inference/",
+            json_data={
+                "dataset_id": str(dataset_id),
+                "model_parameters": [i.model_dump() for i in model_parameters]
+            }
+        )
+
+        return BatchInference(**res)
+
+    def batch_job_status(self, job_id: uuid.UUID) -> BatchInferenceStatus:
+        """
+        Returns the status of a batch inference job.
+        """
+        job = self._get_batch_job(job_id)
+        return job.status
+
+    def _get_batch_job(self, batch_inference_id: uuid.UUID) -> BatchInference:
+        """
+        Get a batch inference object job by ID
+        """
+        res = self.__client.get(
+            uri=f"batch_dataset_inference/{batch_inference_id}"
+        )
+        return BatchInference(**res)
