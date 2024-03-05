@@ -64,6 +64,9 @@ class Completions:
         See https://docs.vendi-ai.com/docs/completions-api#json-schema for more information
         :param regex: The regex to use for the completion (either this or json_schema should be provided)
         See https://docs.vendi-ai.com/docs/completions-api#regex for more information
+        :param checkpoint: The checkpoint to use for the completion (either "latest" or a specific checkpoint ID for lora adapters)
+        :param request_id: The request ID to use for the completion (optional)
+        :param openai_compatible: Whether to return the response in OpenAI compatible format or the vendi full response format
         :return: The generated completion
 
         """
@@ -114,6 +117,9 @@ class Completions:
         request_id: str = None,
         openai_compatible: bool = False
     ) -> VendiCompletionResponse | ChatCompletion:
+        """
+        Same documentation as completions.create but with async operation
+        """
 
         data = {
             "messages": messages,
@@ -149,7 +155,7 @@ class Completions:
     ) -> List[ChatCompletion]:
         """
         Create multiple completions on different models with the same prompt and parameters
-        requests: A list of tuples, where each tuple contains the model parameters and the prompt messages
+        requests: A list of completionr requests
         Examples:
         >>> import uuid
         >>> from vendi.completions.schema import CompletionRequest
@@ -176,7 +182,6 @@ class Completions:
         >>>     )
         >>> )
         """
-        # TODO
 
         tasks = [
             self.acreate(

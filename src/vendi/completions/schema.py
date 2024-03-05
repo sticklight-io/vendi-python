@@ -58,10 +58,15 @@ class Choice(BaseModel):
 
 class VendiCompletionResponse(BaseModel):
     provider_response: any
+    """The response original from the provider. Compatible to the provider"""
     id: str | None = None
+    """A unique identifier for the completion."""
     elapsed_time: float | None = None
+    """The total time taken to generate the completion."""
     provider: str | None = None
+    """The name of the provider that served the completion."""
     parameters: any = None
+    """The parameters used for the completion."""
 
     class Config:
         arbitrary_types_allowed = True
@@ -167,7 +172,6 @@ class BatchInferenceStatus(str, Enum):
     """The batch job successfully completed."""
 
 
-# TODO add documentation on the schema's
 class BatchInference(SchemaMixin):
     model_parameters: list[ModelParameters]
     """The model parameters for the batch inference."""
@@ -191,15 +195,20 @@ class BatchInference(SchemaMixin):
     )
 
 
-class CreateEndpointSchema(BaseModel):
+class Endpoint(SchemaMixin):
     model_id: str
+    """The model identifier served in this endpoint"""
     provider: str
+    """The provider of the model (vendi/openai/google..)"""
     adapter_config: str | None = None
+    """The lora adapter configuration for the model"""
     short_description: str | None = None
+    """A description of the model"""
     full_description: str | None = None
+    """A full description of the model"""
     docs: str | None = None
-
-
-class Endpoint(CreateEndpointSchema, SchemaMixin):
+    """A doc link about the model"""
     status: DeploymentStatus | None = None
+    """The status of the endpoint. If the endpoint is not ready, the status will be `not_ready`"""
     is_configured: bool | None = None
+    """If the endpoint is configured by the user or not"""
