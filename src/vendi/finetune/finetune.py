@@ -10,7 +10,7 @@ class Finetune:
         self.__client = HttpClient(
             url=url,
             api_key=api_key,
-            api_prefix=f"/api/v1"
+            api_prefix="/platform/v1"
         )
 
     def run(
@@ -40,7 +40,6 @@ class Finetune:
         q_lora: bool = True,
         compute_resource: Optional[str] = None,
     ) -> TrainJob:
-
         if lora_target_modules is None:
             lora_target_modules = [
                 "q_proj",

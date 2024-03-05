@@ -1,10 +1,13 @@
+import asyncio
 import uuid
 
 from vendi.completions.schema import CompletionRequest
 from vendi import Vendi
 
-client = Vendi(api_key="my-api-key")
-completions = client.completions.create_many(
+client = Vendi(
+    api_key="my-api-key"
+)
+completions = asyncio.run(client.completions.acreate_many(
     requests=[
         CompletionRequest(
             model="openai/gpt-3.5-turbo",
@@ -21,6 +24,7 @@ completions = client.completions.create_many(
             request_id=str(uuid.uuid4()),
         ),
     ]
+)
 )
 
 print(completions)

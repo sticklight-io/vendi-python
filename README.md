@@ -74,7 +74,7 @@ chat_completion = client.completions.create(
     stop=["\n"]
 )
 
-print(chat_completion.choices[0].text)
+print(chat_completion.provider_response.choices[0].text)
 ```
 
 The inference endpoints are OpenAI compatible, so you can use the same parameters as the OpenAI API or even the OpenAI
@@ -127,7 +127,7 @@ client = Vendi(
     api_key="my-api-key"
 )
 
-dataset_id = client.datasets.upload(
+dataset = client.datasets.upload(
     name="my-dataset",
     data_path="conversation.jsonl"
 )
@@ -136,7 +136,7 @@ finetune_job = client.finetune.run(
     run_name="my-first-finetune",
     model_description="My first finetune",
     model_name="vendi/mistralai/Mistral-7B-Instruct-v0.2",
-    dataset_id=dataset_id
+    dataset_id=dataset.id
 )
 
 print(finetune_job)

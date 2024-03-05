@@ -8,8 +8,6 @@ from vendi.core.schema import SchemaMixin
 
 
 class DeploymentStatus(str, Enum):
-    CREATING = "CREATING"
-    """The deployment is being created."""
     LIVE = "LIVE"
     """The deployment is live and ready to be used."""
     DOES_NOT_EXIST = "DOES_NOT_EXIST"
@@ -22,6 +20,8 @@ class DeploymentStatus(str, Enum):
     """The deployment is stopped and not ready to be used."""
     STOPPING = "STOPPING"
     """The deployment is being stopped. This is a temporary state."""
+    NOT_READY = "NOT_READY"
+    """The deployment is not ready yet to be used."""
 
 
 class DeploymentConfig(BaseModel):

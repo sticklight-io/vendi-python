@@ -6,7 +6,7 @@ client = Vendi(
 
 dataset_id = client.datasets.upload(
     name="my-dataset",
-    data_path="conversation.jsonl"
+    data_path="../conversation.jsonl"
 )
 
 models = client.finetune.available_models()

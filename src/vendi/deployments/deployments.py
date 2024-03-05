@@ -12,7 +12,7 @@ class Deployments:
         self.__client = HttpClient(
             url=url,
             api_key=api_key,
-            api_prefix=f"/api/v1/"
+            api_prefix=f"/v1/"
         )
 
     def list(self) -> list[Deployment]:

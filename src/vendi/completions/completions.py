@@ -1,12 +1,12 @@
+import asyncio
 import time
 import uuid
 from typing import List, Dict, Optional
 
-from vendi.completions.schema import ChatCompletion, ModelParameters, BatchInference, BatchInferenceStatus, LlmMessage, \
-    CompletionRequest
+from vendi.completions.schema import ChatCompletion, ModelParameters, BatchInference, BatchInferenceStatus, \
+    CompletionRequest, Endpoint, VendiCompletionResponse
+from vendi.core.ahttp_client import AsyncHTTPClient
 from vendi.core.http_client import HttpClient
-from vendi.endpoints.schema import EndpointInfo
-from vendi.models.schema import ModelProvider
 
 
 class Completions:
@@ -24,8 +24,11 @@ class Completions:
         self.__client = HttpClient(
             url=url,
             api_key=api_key,
-            api_prefix=f"/api/v1/providers/"
         )
+        self.__aclient = AsyncHTTPClient(
+            base_url=url,
+        )
+        self.__aclient.set_auth_header(api_key)
 
     def create(
         self,
@@ -41,7 +44,10 @@ class Completions:
         temperature: Optional[float] = 0.7,
         json_schema: Optional[str] = None,
         regex: Optional[str] = None,
-    ) -> ChatCompletion:
+        checkpoint: str | None = "latest",
+        request_id: str = None,
+        openai_compatible: bool = False
+    ) -> VendiCompletionResponse | ChatCompletion:
         """
         Create a completion on a language model with the given parameters
         :param model: The ID of the language model to use for the completion. Should be in the format of <provider>/<model_id>
@@ -55,9 +61,12 @@ class Completions:
         :param top_k: The top k value to use for the completion
         :param temperature: The temperature value to use for the completion
         :param json_schema: The JSON schema to use for the completion (either this or regex should be provided) .
-        See https://docs.vendi.ai/docs/completions-api#json-schema for more information
+        See https://docs.vendi-ai.com/docs/completions-api#json-schema for more information
         :param regex: The regex to use for the completion (either this or json_schema should be provided)
-        See https://docs.vendi.ai/docs/completions-api#regex for more information
+        See https://docs.vendi-ai.com/docs/completions-api#regex for more information
+        :param checkpoint: The checkpoint to use for the completion (either "latest" or a specific checkpoint ID for lora adapters)
+        :param request_id: The request ID to use for the completion (optional)
+        :param openai_compatible: Whether to return the response in OpenAI compatible format or the vendi full response format
         :return: The generated completion
 
         """
@@ -73,109 +82,87 @@ class Completions:
             "temperature": temperature,
             "json_schema": json_schema,
             "regex": regex,
+            "checkpoint": checkpoint,
+            "request_id": request_id
         }
 
         if stop is not None:
             data["stop"] = stop
 
-        res = self.__client.post(
-            uri=f"completions/",
+        _res = self.__client.post(
+            uri=f"/v1/chat/completions/",
             json_data=data
         )
-        return ChatCompletion(**res)
 
-    def create_many_prompts(
+        res = VendiCompletionResponse(**_res)
+        if openai_compatible:
+            return res.provider_response
+        return res
+
+    async def acreate(
         self,
-        model,
-        conversations: List[List[Dict[str, str]]],
+        model: str,
+        messages: List[Dict[str, str]],
         frequency_penalty: Optional[float] = 0,
-        presence_penalty: Optional[float] = 0,
+        presence_penalty: Optional[float] = 0.5,
         max_tokens: Optional[int] = 256,
         stop: Optional[List[str]] = None,
         n: Optional[int] = 1,
         top_p: Optional[float] = 1,
         top_k: Optional[int] = 40,
         temperature: Optional[float] = 0.7,
-    ) -> List[ChatCompletion]:
+        json_schema: Optional[str] = None,
+        regex: Optional[str] = None,
+        checkpoint: str | None = "latest",
+        request_id: str = None,
+        openai_compatible: bool = False
+    ) -> VendiCompletionResponse | ChatCompletion:
         """
-        Create multiple completions on the same model with different prompts, while keeping the same parameters
-        :param model: The ID of the language model to use for the completion. Should be in the format of <provider>/<model_id>
-        :param conversations: A batch of multiple prompt messages to use for the completions
-        :param frequency_penalty: The frequency penalty to use for the completion
-        :param presence_penalty: The presence penalty to use for the completion
-        :param max_tokens: The maximum number of tokens to generate for the completion
-        :param stop: The stop condition to use for the completion
-        :param n: The number of completions to generate
-        :param top_p: The top p value to use for the completion
-        :param top_k: The top k value to use for the completion
-        :param temperature: The temperature value to use for the completion
-        :return: The generated completions
-
-        Examples:
-        >>> from vendi import Vendi
-        >>> client = Vendi(api_key="my-api-key")
-        >>> completions = client.completions.create_many_prompts(
-        >>>     model="vendi/mistral-7b-instruct-v2",
-        >>>     conversations=[
-        >>>         [
-        >>>             {
-        >>>                 "role": "user",
-        >>>                 "content": "Hello"
-        >>>             }
-        >>>     ],
-        >>>     [
-        >>>             {
-        >>>                 "role": "user",
-        >>>                 "content": "Hello what's up with you?"
-        >>>            }
-        >>>            ]
-        >>>     ],
-        >>> )
-
+        Same documentation as completions.create but with async operation
         """
 
-        requests_body = [
-            {
-                "messages": message,
-                "model": model,
-                "frequency_penalty": frequency_penalty,
-                "presence_penalty": presence_penalty,
-                "max_tokens": max_tokens,
-                "n": n,
-                "top_p": top_p,
-                "top_k": top_k,
-                "temperature": temperature,
-            }
-            for message in conversations
-        ]
+        data = {
+            "messages": messages,
+            "model": model,
+            "frequency_penalty": frequency_penalty,
+            "presence_penalty": presence_penalty,
+            "max_tokens": max_tokens,
+            "n": n,
+            "top_p": top_p,
+            "top_k": top_k,
+            "temperature": temperature,
+            "json_schema": json_schema,
+            "regex": regex,
+            "checkpoint": checkpoint,
+            "request_id": request_id
+        }
 
         if stop is not None:
-            for req in requests_body:
-                req["stop"] = stop
+            data["stop"] = stop
 
-        res = self.__client.post(
-            uri=f"completions-many",
-            json_data=
-            {
-                "requests": requests_body
-            }
+        _res = await self.__aclient.post(
+            path=f"/v1/chat/completions/",
+            json=data
         )
-        return [ChatCompletion(**completion) for completion in res]
+        res = VendiCompletionResponse(**_res)
+        if openai_compatible:
+            return res.provider_response
+        return res
 
-    def create_many(
+    async def acreate_many(
         self,
         requests: list[CompletionRequest],
     ) -> List[ChatCompletion]:
         """
         Create multiple completions on different models with the same prompt and parameters
-        requests: A list of tuples, where each tuple contains the model parameters and the prompt messages
+        requests: A list of completionr requests
         Examples:
         >>> import uuid
         >>> from vendi.completions.schema import CompletionRequest
         >>> from vendi import Vendi
         >>>
         >>> client = Vendi(api_key="my-api-key")
-        >>> completions = client.completions.create_many(
+        >>> completions = asyncio.run(client.completions.acreate_many(
         >>>     requests=[
         >>>         CompletionRequest(
         >>>             model="openai/gpt-3.5-turbo",
@@ -192,98 +179,34 @@ class Completions:
         >>>             request_id=str(uuid.uuid4()),
         >>>         ),
         >>>     ]
+        >>>     )
         >>> )
         """
 
-        res = self.__client.post(
-            uri=f"completions-many/",
-            json_data=
-            {
-                "requests": [i.model_dump() for i in requests]
-            }
-        )
-        return [ChatCompletion(**completion) for completion in res]
-
-    def create_many_models(
-        self,
-        models: List[str],
-        messages: List[Dict[str, str]],
-        frequency_penalty: Optional[float] = 0,
-        presence_penalty: Optional[float] = 0,
-        max_tokens: Optional[int] = 256,
-        stop: Optional[List[str]] = None,
-        n: Optional[int] = 1,
-        top_p: Optional[float] = 1,
-        top_k: Optional[int] = 40,
-        temperature: Optional[float] = 0.7,
-    ) -> List[ChatCompletion]:
-        """
-        Create multiple completions on different models with the same prompt and parameters
-        :param models: A list of models to use for the completions. Each model should be in the format of <provider>/<model_id>
-        :param messages: The messages to use as the prompt for the completions
-        :param frequency_penalty: The frequency penalty to use for the completions
-        :param presence_penalty: The presence penalty to use for the completions
-        :param max_tokens: The maximum number of tokens to generate for the completions
-        :param stop: The stop condition to use for the completions
-        :param n: The number of completions to generate
-        :param top_p: The top p value to use for the completions
-        :param top_k: The top k value to use for the completions
-        :param temperature: The temperature value to use for the completions
-        :return: The generated completions
-
-        Examples:
-        >>> from vendi import Vendi
-        >>> client = Vendi(api_key="my-api-key")
-        >>> completions = client.completions.create_many(
-        >>>     models=[
-        >>>         "vendi/mistral-7b-instruct-v2",
-        >>>         "openai/gpt-3.5-turbo",
-        >>>         "openai/gpt4",
-        >>>     ],
-        >>>     messages=[
-        >>>         {
-        >>>             "role": "user",
-        >>>             "content": "Hello"
-        >>>         }
-        >>>     ]
-        >>> )
-        """
-
-        requests_body = [
-            {
-                "messages": messages,
-                "model": model,
-                "frequency_penalty": frequency_penalty,
-                "presence_penalty": presence_penalty,
-                "max_tokens": max_tokens,
-                "n": n,
-                "top_p": top_p,
-                "top_k": top_k,
-                "temperature": temperature,
-            }
-            for model in models
+        tasks = [
+            self.acreate(
+                **request.model_dump()
+            ) for request in requests
         ]
 
-        if stop is not None:
-            for req in requests_body:
-                req["stop"] = stop
+        res = await asyncio.gather(*tasks)
+        return res
 
-        res = self.__client.post(
-            uri=f"completions-many/",
-            json_data=
-            {
-                "requests": requests_body
-            }
-        )
-        return [ChatCompletion(**completion) for completion in res]
-
-    def available_endpoints(self, provider: ModelProvider) -> List[EndpointInfo]:
+    def available_endpoints(self) -> List[Endpoint]:
         """
-        Get the list of available endpoints for the completions API
+        Get the list of available endpoints , those that are configured and ready to use
         :return: The list of available endpoints
         """
-        res = self.__client.get(uri=f"{provider}/endpoints")
-        return [EndpointInfo(**endpoint) for endpoint in res[provider]]
+        _endpoints = self.__client.get(uri="/platform/v1/inference/endpoints")
+        return [Endpoint(**endpoint) for endpoint in _endpoints]
+
+    def endpoints_catalog(self) -> List[Endpoint]:
+        """
+        Get the list of all supported endpoints within the platform
+        :return: The list of all supported endpoints
+        """
+        _endpoints = self.__client.get(uri="/platform/v1/inference/endpoints/all")
+        return [Endpoint(**endpoint) for endpoint in _endpoints]
 
     def run_batch_job(
         self,
@@ -320,7 +243,7 @@ class Completions:
 
     def __post_batch_job(self, dataset_id: uuid.UUID, model_parameters: list[ModelParameters]) -> BatchInference:
         res = self.__client.post(
-            uri="batch_dataset_inference/",
+            uri="/platform/v1/inference/batch/",
             json_data={
                 "dataset_id": str(dataset_id),
                 "model_parameters": [i.model_dump() for i in model_parameters]
@@ -341,6 +264,6 @@ class Completions:
         Get a batch inference object job by ID
         """
         res = self.__client.get(
-            uri=f"batch_dataset_inference/{batch_inference_id}"
+            uri=f"/platform/v1/inference/batch/{batch_inference_id}"
         )
         return BatchInference(**res)
