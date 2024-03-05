@@ -35,6 +35,9 @@ messages = [
     },
 ]
 
+# To pass images bytes use {"url": f"data:image/jpeg;base64,{base64_image}"} instead of
+# {"url": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Cat03.jpg/481px-Cat03.jpg"}
+
 completion = client.completions.create(
     model="vendi/llava-v1-6-mistral-7b",
     messages=messages
