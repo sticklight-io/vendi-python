@@ -20,7 +20,7 @@ class Datasets:
         self.__client = HttpClient(
             url=url,
             api_key=api_key,
-            api_prefix=f"/api/v1/datasets"
+            api_prefix=f"/platform/v1/datasets"
         )
 
     def get(self, dataset_id: str) -> Dataset:

@@ -4,13 +4,13 @@ from vendi.core.http_client import HttpClient
 from vendi.finetune.schema import TrainData, TrainJob
 from vendi.models.schema import ModelInfo, ModelProvider
 
-
+# TODO
 class Finetune:
     def __init__(self, url: str, api_key: str):
         self.__client = HttpClient(
             url=url,
             api_key=api_key,
-            api_prefix=f"/api/v1"
+            api_prefix="/v1"
         )
 
     def run(

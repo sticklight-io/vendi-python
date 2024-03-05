@@ -7,7 +7,7 @@ class Models:
         self.__client = HttpClient(
             url=url,
             api_key=api_key,
-            api_prefix=f"/api/v1/models"
+            api_prefix=f"/platform/v1/models"
         )
 
     # def create(self, name: str, model: Model):
