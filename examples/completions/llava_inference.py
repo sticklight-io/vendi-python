@@ -29,6 +29,7 @@ messages = [
             {"type": "text", "text": prompt},
             {"type": "image_url", "image_url": {
                 "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Cat03.jpg/481px-Cat03.jpg"
+                # "url": f"data:image/jpeg;base64,{base64_image}"
             }
              },
         ]
