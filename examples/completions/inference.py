@@ -6,14 +6,15 @@ client = Vendi(
 
 prompt = "This is the first ever loop closed in vendi platform. what a tremendous milestone. what do you think?"
 
-available_endpoints = client.completions.available_endpoints()
-catalog = client.completions.endpoints_catalog()
+# available_endpoints = client.completions.available_endpoints()
+# catalog = client.completions.endpoints_catalog()
 
 messages = [{"role": "user", "content": prompt}]
 completion = client.completions.create(
     model="vendi/phi2",
     messages=messages,
-    regex="yes|no|maybe"
+    regex="yes|no|maybe",
+    openai_compatible=True
 )
 
 print(completion)

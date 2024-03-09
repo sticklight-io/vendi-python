@@ -96,7 +96,7 @@ class Completions:
 
         res = VendiCompletionResponse(**_res)
         if openai_compatible:
-            return res.provider_response
+            return ChatCompletion(**res.provider_response)
         return res
 
     async def acreate(
@@ -146,7 +146,7 @@ class Completions:
         )
         res = VendiCompletionResponse(**_res)
         if openai_compatible:
-            return res.provider_response
+            return ChatCompletion(**res.provider_response)
         return res
 
     async def acreate_many(
