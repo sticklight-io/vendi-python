@@ -44,9 +44,11 @@ class Completions:
         temperature: Optional[float] = 0.7,
         json_schema: Optional[str] = None,
         regex: Optional[str] = None,
-        checkpoint: str | None = "latest",
+        checkpoint: str | None = None,
         request_id: str = None,
-        openai_compatible: bool = False
+        openai_compatible: bool = False,
+        extra_body: Optional[Dict] = None,
+        extra_headers: Optional[Dict] = None,
     ) -> VendiCompletionResponse | ChatCompletion:
         """
         Create a completion on a language model with the given parameters
@@ -67,6 +69,8 @@ class Completions:
         :param checkpoint: The checkpoint to use for the completion (either "latest" or a specific checkpoint ID for lora adapters)
         :param request_id: The request ID to use for the completion (optional)
         :param openai_compatible: Whether to return the response in OpenAI compatible format or the vendi full response format
+        :param extra_body: Extra body parameters to include in the request body
+        :param extra_headers: Extra headers to include in the request
         :return: The generated completion
 
         """
@@ -83,7 +87,9 @@ class Completions:
             "json_schema": json_schema,
             "regex": regex,
             "checkpoint": checkpoint,
-            "request_id": request_id
+            "request_id": request_id,
+            "openai_compatible": openai_compatible,
+            **extra_body
         }
 
         if stop is not None:
@@ -91,13 +97,13 @@ class Completions:
 
         _res = self.__client.post(
             uri=f"/v1/chat/completions/",
-            json_data=data
+            json_data=data,
+            headers=extra_headers
         )
 
-        res = VendiCompletionResponse(**_res)
         if openai_compatible:
-            return ChatCompletion(**res.provider_response)
-        return res
+            return ChatCompletion(**_res)
+        return VendiCompletionResponse(**_res)
 
     async def acreate(
         self,
@@ -113,9 +119,11 @@ class Completions:
         temperature: Optional[float] = 0.7,
         json_schema: Optional[str] = None,
         regex: Optional[str] = None,
-        checkpoint: str | None = "latest",
+        checkpoint: str | None = None,
         request_id: str = None,
-        openai_compatible: bool = False
+        openai_compatible: bool = False,
+        extra_body: Optional[Dict] = None,
+        extra_headers: Optional[Dict] = None,
     ) -> VendiCompletionResponse | ChatCompletion:
         """
         Same documentation as completions.create but with async operation
@@ -134,7 +142,9 @@ class Completions:
             "json_schema": json_schema,
             "regex": regex,
             "checkpoint": checkpoint,
-            "request_id": request_id
+            "request_id": request_id,
+            "openai_compatible": openai_compatible,
+            **extra_body
         }
 
         if stop is not None:
@@ -142,12 +152,12 @@ class Completions:
 
         _res = await self.__aclient.post(
             path=f"/v1/chat/completions/",
-            json=data
+            json=data,
+            headers=extra_headers
         )
-        res = VendiCompletionResponse(**_res)
         if openai_compatible:
-            return ChatCompletion(**res.provider_response)
-        return res
+            return ChatCompletion(**_res)
+        return VendiCompletionResponse(**_res)
 
     async def acreate_many(
         self,
@@ -246,7 +256,7 @@ class Completions:
             uri="/platform/v1/inference/batch/",
             json_data={
                 "dataset_id": str(dataset_id),
-                "model_parameters": [i.model_dump() for i in model_parameters]
+                "model_parameters": [{**i.model_dump(), **i.model_extra} for i in model_parameters]
             }
         )
 

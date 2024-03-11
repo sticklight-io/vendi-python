@@ -23,11 +23,14 @@ class AsyncHTTPClient:
             ) as response:
                 return await self._handle_response(response)
 
-    async def post(self, path: str, data: dict = None, **kwargs) -> dict:
+    async def post(self, path: str, data: dict = None, headers: dict = None, **kwargs) -> dict:
         url = self.base_url + path
+        _headers = self.headers
+        if headers:
+            _headers.update(headers)
         async with aiohttp.ClientSession() as session:
             async with session.post(
-                url, data=data, timeout=self.timeout, headers=self.headers, **kwargs
+                url, data=data, timeout=self.timeout, headers=headers, **kwargs
             ) as response:
                 return await self._handle_response(response)
 
