@@ -89,8 +89,9 @@ class Completions:
             "checkpoint": checkpoint,
             "request_id": request_id,
             "openai_compatible": openai_compatible,
-            **extra_body
         }
+        if extra_body:
+            data.update(extra_body)
 
         if stop is not None:
             data["stop"] = stop
