@@ -30,7 +30,7 @@ class AsyncHTTPClient:
             _headers.update(headers)
         async with aiohttp.ClientSession() as session:
             async with session.post(
-                url, data=data, timeout=self.timeout, headers=headers, **kwargs
+                url, data=data, timeout=self.timeout, headers=_headers, **kwargs
             ) as response:
                 return await self._handle_response(response)
 
