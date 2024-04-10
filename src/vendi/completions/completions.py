@@ -165,7 +165,7 @@ class Completions:
     async def acreate_many(
         self,
         requests: list[CompletionRequest],
-    ) -> List[ChatCompletion]:
+    ) -> List[ChatCompletion] | List[VendiCompletionResponse]:
         """
         Create multiple completions on different models with the same prompt and parameters
         requests: A list of completionr requests
@@ -254,6 +254,36 @@ class Completions:
                 time.sleep(poll_interval)
         return job
 
+    async def arun_batch_job(
+        self,
+        dataset_id: uuid.UUID,
+        model_parameters: list[ModelParameters],
+        wait_until_complete: bool = False,
+        timeout: int = 3000,
+        poll_interval: int = 5,
+    ) -> BatchInference:
+        _res = await self.__aclient.post(
+            path="/platform/v1/inference/batch/",
+            json={
+                "dataset_id": str(dataset_id),
+                "model_parameters": [{**i.model_dump(), **i.model_extra} for i in model_parameters]
+            }
+        )
+        job = BatchInference(**_res)
+
+        if wait_until_complete:
+            start_time = time.time()
+            while True:
+                job = await self._aget_batch_job(job.id)
+                if job.status in [BatchInferenceStatus.COMPLETED, BatchInferenceStatus.FAILED]:
+                    return job
+                if time.time() - start_time > timeout:
+                    raise TimeoutError(
+                        "The batch job did not complete within the specified timeout. "
+                        "You can still check its status by using the batch_job_status method.")
+
+                await asyncio.sleep(poll_interval)
+
     def __post_batch_job(self, dataset_id: uuid.UUID, model_parameters: list[ModelParameters]) -> BatchInference:
         res = self.__client.post(
             uri="/platform/v1/inference/batch/",
@@ -280,3 +310,27 @@ class Completions:
             uri=f"/platform/v1/inference/batch/{batch_inference_id}"
         )
         return BatchInference(**res)
+
+    async def _aget_batch_job(self, batch_inference_id: uuid.UUID) -> BatchInference:
+        """
+        Get a batch inference object job by ID
+        """
+        res = await self.__aclient.get(
+            path=f"/platform/v1/inference/batch/{batch_inference_id}"
+        )
+        return BatchInference(**res)
+
+    def list_batch_jobs(self) -> List[BatchInference]:
+        """
+        Get all batch inferences
+        """
+        res = self.__client.get(
+            uri="/platform/v1/inference/batch/"
+        )
+        return [BatchInference(**i) for i in res]
+
+    def delete_batch_job(self, batch_id: uuid.UUID):
+        """
+        Delete a batch inference job
+        """
+        return self.__client.delete(f"/platform/v1/inference/batch/{batch_id}")
