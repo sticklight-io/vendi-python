@@ -46,7 +46,8 @@ class HttpClient:
 
     def _set_headers(self, headers: Dict[str, str]) -> Dict[str, str]:
         _headers = {
-            "x-api-key": self.__api_key,
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {self.__api_key}",
         }
         if headers:
             _headers.update(headers)

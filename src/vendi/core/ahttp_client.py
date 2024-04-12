@@ -9,11 +9,8 @@ class AsyncHTTPClient:
             "content-type": "application/json",
         }
 
-    def set_auth_header(self, access_key: str | None = None, jwt: str | None = None):
-        if access_key:
-            self.headers["x-api-key"] = access_key
-        if jwt:
-            self.headers["Authorization"] = f"Bearer {jwt}"
+    def set_auth_header(self, api_key: str):
+        self.headers["Authorization"] = f"Bearer {api_key}"
 
     async def get(self, path: str, params: dict = None) -> dict:
         url = self.base_url + path
