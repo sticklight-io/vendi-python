@@ -263,7 +263,7 @@ class Completions:
         poll_interval: int = 5,
     ) -> BatchInference:
         _res = await self.__aclient.post(
-            path="/platform/v1/inference/batch",
+            path="/platform/v1/inference/batch/",
             json={
                 "dataset_id": str(dataset_id),
                 "model_parameters": [{**i.model_dump(), **i.model_extra} for i in model_parameters]
