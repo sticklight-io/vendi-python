@@ -1,8 +1,8 @@
 from typing import Optional, List
 
-from vendi.core.http_client import HttpClient
-from vendi.finetune.schema import TrainData, TrainJob
-from vendi.models.schema import ModelInfo, ModelProvider
+from vendi_sdk.core.http_client import HttpClient
+from vendi_sdk.finetune.schema import TrainData, TrainJob
+from vendi_sdk.models.schema import ModelInfo, ModelProvider
 
 
 class Finetune:

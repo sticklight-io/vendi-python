@@ -4,7 +4,7 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict
 
-from vendi.core.schema import SchemaMixin
+from vendi_sdk.core.schema import SchemaMixin
 
 
 class DeploymentStatus(str, Enum):

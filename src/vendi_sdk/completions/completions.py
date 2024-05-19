@@ -3,10 +3,10 @@ import time
 import uuid
 from typing import List, Dict, Optional
 
-from vendi.completions.schema import ChatCompletion, ModelParameters, BatchInference, BatchInferenceStatus, \
+from vendi_sdk.completions.schema import ChatCompletion, ModelParameters, BatchInference, BatchInferenceStatus, \
     CompletionRequest, Endpoint, VendiCompletionResponse
-from vendi.core.ahttp_client import AsyncHTTPClient
-from vendi.core.http_client import HttpClient
+from vendi_sdk.core.ahttp_client import AsyncHTTPClient
+from vendi_sdk.core.http_client import HttpClient
 
 
 class Completions:

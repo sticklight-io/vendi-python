@@ -5,8 +5,8 @@ from typing import List, Dict, Union, Optional
 
 import pandas as pd
 
-from vendi.core.http_client import HttpClient
-from vendi.datasets.schema import Dataset, DatasetType
+from vendi_sdk.core.http_client import HttpClient
+from vendi_sdk.datasets.schema import Dataset, DatasetType
 
 logger = logging.getLogger(__name__)
 

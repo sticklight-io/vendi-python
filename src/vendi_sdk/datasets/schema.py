@@ -5,7 +5,7 @@ from typing import Callable, Any
 import pandas as pd
 from pydantic import BaseModel
 
-from vendi.core.schema import SchemaMixin
+from vendi_sdk.core.schema import SchemaMixin
 
 
 class DatasetType(str, Enum):

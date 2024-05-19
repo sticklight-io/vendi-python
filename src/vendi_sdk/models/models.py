@@ -1,5 +1,5 @@
-from vendi.core.http_client import HttpClient
-from vendi.models.schema import Model, HuggingFaceModel, ModelProvider
+from vendi_sdk.core.http_client import HttpClient
+from vendi_sdk.models.schema import Model, HuggingFaceModel, ModelProvider
 
 
 class Models:

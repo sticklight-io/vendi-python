@@ -15,7 +15,7 @@ from traceloop.sdk.tracing.tracing import (
 )
 from traceloop.sdk.utils import camel_to_snake
 
-from ..collector import Collector
+from vendi_sdk.runtime.instrument import Instrument
 
 
 def task(
@@ -24,7 +24,7 @@ def task(
     tlp_span_kind: Optional[TraceloopSpanKindValues] = TraceloopSpanKindValues.TASK,
     id: Optional[str] = None,
 ):
-    Collector.set_task_name(name)
+    Instrument.set_task_name(name)
     if method_name is None:
         return task_method(name=name, tlp_span_kind=tlp_span_kind)
     else:
@@ -194,7 +194,7 @@ def atask(
     method_name: Optional[str] = None,
     tlp_span_kind: Optional[TraceloopSpanKindValues] = TraceloopSpanKindValues.TASK,
 ):
-    Collector.set_task_name(name)
+    # Collector.set_task_name(name)
     if method_name is None:
         return atask_method(name=name, tlp_span_kind=tlp_span_kind)
     else:
