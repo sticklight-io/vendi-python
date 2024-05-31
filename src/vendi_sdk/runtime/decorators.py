@@ -15,17 +15,15 @@ from traceloop.sdk.tracing.tracing import (
 )
 from traceloop.sdk.utils import camel_to_snake
 
-from vendi_sdk import vendi
-from vendi_sdk.runtime.instrument import Instrument
+from vendi_sdk.runtime.instrument import InstrumentContext
 
 
 def task(
-        name: Optional[str] = None,
-        method_name: Optional[str] = None,
-        tlp_span_kind: Optional[TraceloopSpanKindValues] = TraceloopSpanKindValues.TASK,
-        id: Optional[str] = None,
+    name: Optional[str] = None,
+    method_name: Optional[str] = None,
+    tlp_span_kind: Optional[TraceloopSpanKindValues] = TraceloopSpanKindValues.TASK,
+    id: Optional[str] = None,
 ):
-    Instrument.set_task_name(name)
     if method_name is None:
         return task_method(name=name, tlp_span_kind=tlp_span_kind)
     else:
@@ -35,8 +33,8 @@ def task(
 
 
 def task_method(
-        name: Optional[str] = None,
-        tlp_span_kind: Optional[TraceloopSpanKindValues] = TraceloopSpanKindValues.TASK,
+    name: Optional[str] = None,
+    tlp_span_kind: Optional[TraceloopSpanKindValues] = TraceloopSpanKindValues.TASK,
 ):
     def decorate(fn):
         @wraps(fn)
@@ -86,9 +84,9 @@ def task_method(
 
 
 def task_class(
-        name: Optional[str],
-        method_name: str,
-        tlp_span_kind: Optional[TraceloopSpanKindValues] = TraceloopSpanKindValues.TASK,
+    name: Optional[str],
+    method_name: str,
+    tlp_span_kind: Optional[TraceloopSpanKindValues] = TraceloopSpanKindValues.TASK,
 ):
     def decorator(cls):
         task_name = name if name else camel_to_snake(cls.__name__)
@@ -104,27 +102,27 @@ def task_class(
 
 
 def workflow(
-        name: Optional[str] = None,
-        method_name: Optional[str] = None,
-        id: Optional[str] = None,
+    workflow_name: Optional[str] = None,
+    method_name: Optional[str] = None,
+    run_id: Optional[str] = None,
 ):
     if method_name is None:
-        return workflow_method(name=name, workflow_id=id)
+        return workflow_method(workflow_name=workflow_name, run_id=run_id)
     else:
         return workflow_class(
-            name=name, method_name=method_name, workflow_id=id)
+            workflow_name=workflow_name, method_name=method_name, run_id=run_id)
 
 
-def workflow_method(name: Optional[str] = None, workflow_id: Optional[str] = None):
+def workflow_method(workflow_name: Optional[str] = None, run_id: Optional[str] = None):
     def decorate(fn):
         @wraps(fn)
         def wrap(*args, **kwargs):
             if not TracerWrapper.verify_initialized():
                 return fn(*args, **kwargs)
 
-            workflow_name = name or fn.__name__
-            set_workflow_name(workflow_name)
-            span_name = f"{workflow_name}.workflow"
+            wf_name = workflow_name or fn.__name__
+            set_workflow_name(wf_name)
+            span_name = f"{wf_name}.workflow"
 
             with get_tracer(flush_on_exit=True) as tracer:
                 current_span = get_current_span()
@@ -136,11 +134,11 @@ def workflow_method(name: Optional[str] = None, workflow_id: Optional[str] = Non
                     )
                     span.set_attribute(
                         SpanAttributes.TRACELOOP_ENTITY_NAME,
-                        name
+                        wf_name
                     )
-
-                    if workflow_id:
-                        Instrument.set_workflow(name=workflow_name, id=workflow_id)
+                    InstrumentContext.set_workflow(name=wf_name)
+                    if run_id:
+                        InstrumentContext.set_run_id(run_id)
 
                     try:
                         if _should_send_prompts():
@@ -152,7 +150,7 @@ def workflow_method(name: Optional[str] = None, workflow_id: Optional[str] = Non
                         Telemetry().log_exception(e)
 
                     res = fn(*args, **kwargs)
-
+                    InstrumentContext.unset_workflow(workflow_name=wf_name)
                     try:
                         if _should_send_prompts():
                             span.set_attribute(
@@ -165,20 +163,19 @@ def workflow_method(name: Optional[str] = None, workflow_id: Optional[str] = Non
 
         return wrap
 
-    Instrument.unset_workflow()
     return decorate
 
 
 def workflow_class(
-        name: Optional[str], method_name: str, workflow_id: Optional[str] = None
+    workflow_name: Optional[str], method_name: str, run_id: Optional[str] = None
 ):
     def decorator(cls):
-        workflow_name = name if name else camel_to_snake(cls.__name__)
+        wf_name = workflow_name if workflow_name else camel_to_snake(cls.__name__)
         method = getattr(cls, method_name)
         setattr(
             cls,
             method_name,
-            workflow_method(name=workflow_name, workflow_id=workflow_id)(method),
+            workflow_method(workflow_name=wf_name, run_id=run_id)(method),
         )
         return cls
 
@@ -199,9 +196,9 @@ def tool(name: Optional[str] = None, method_name: Optional[str] = None):
 
 # Async Decorators
 def atask(
-        name: Optional[str] = None,
-        method_name: Optional[str] = None,
-        tlp_span_kind: Optional[TraceloopSpanKindValues] = TraceloopSpanKindValues.TASK,
+    name: Optional[str] = None,
+    method_name: Optional[str] = None,
+    tlp_span_kind: Optional[TraceloopSpanKindValues] = TraceloopSpanKindValues.TASK,
 ):
     # Collector.set_task_name(name)
     if method_name is None:
@@ -213,8 +210,8 @@ def atask(
 
 
 def atask_method(
-        name: Optional[str] = None,
-        tlp_span_kind: Optional[TraceloopSpanKindValues] = TraceloopSpanKindValues.TASK,
+    name: Optional[str] = None,
+    tlp_span_kind: Optional[TraceloopSpanKindValues] = TraceloopSpanKindValues.TASK,
 ):
     def decorate(fn):
         @wraps(fn)
@@ -261,9 +258,9 @@ def atask_method(
 
 
 def atask_class(
-        name: Optional[str],
-        method_name: str,
-        tlp_span_kind: Optional[TraceloopSpanKindValues] = TraceloopSpanKindValues.TASK,
+    name: Optional[str],
+    method_name: str,
+    tlp_span_kind: Optional[TraceloopSpanKindValues] = TraceloopSpanKindValues.TASK,
 ):
     def decorator(cls):
         task_name = name if name else camel_to_snake(cls.__name__)
@@ -279,28 +276,28 @@ def atask_class(
 
 
 def aworkflow(
-        name: Optional[str] = None,
-        method_name: Optional[str] = None,
-        correlation_id: Optional[str] = None,
+    workflow_name: Optional[str] = None,
+    method_name: Optional[str] = None,
+    run_id: Optional[str] = None,
 ):
     if method_name is None:
-        return aworkflow_method(name=name, correlation_id=correlation_id)
+        return aworkflow_method(workflow_name=workflow_name, run_id=run_id)
     else:
         return aworkflow_class(
-            name=name, method_name=method_name, correlation_id=correlation_id
+            name=workflow_name, method_name=method_name, run_id=run_id
         )
 
 
-def aworkflow_method(name: Optional[str] = None, correlation_id: Optional[str] = None):
+def aworkflow_method(workflow_name: Optional[str] = None, run_id: Optional[str] = None):
     def decorate(fn):
         @wraps(fn)
         async def wrap(*args, **kwargs):
             if not TracerWrapper.verify_initialized():
                 return await fn(*args, **kwargs)
 
-            workflow_name = name or fn.__name__
-            set_workflow_name(workflow_name)
-            span_name = f"{workflow_name}.workflow"
+            wf_name = workflow_name or fn.__name__
+            set_workflow_name(wf_name)
+            span_name = f"{wf_name}.workflow"
 
             with get_tracer(flush_on_exit=True) as tracer:
                 with tracer.start_as_current_span(span_name) as span:
@@ -308,11 +305,11 @@ def aworkflow_method(name: Optional[str] = None, correlation_id: Optional[str] =
                         SpanAttributes.TRACELOOP_SPAN_KIND,
                         TraceloopSpanKindValues.WORKFLOW.value,
                     )
-                    span.set_attribute(SpanAttributes.TRACELOOP_ENTITY_NAME, name)
+                    span.set_attribute(SpanAttributes.TRACELOOP_ENTITY_NAME, wf_name)
 
-                    if correlation_id:
+                    if run_id:
                         span.set_attribute(
-                            SpanAttributes.TRACELOOP_CORRELATION_ID, correlation_id
+                            SpanAttributes.TRACELOOP_CORRELATION_ID, run_id
                         )
 
                     try:
@@ -325,6 +322,7 @@ def aworkflow_method(name: Optional[str] = None, correlation_id: Optional[str] =
                         Telemetry().log_exception(e)
 
                     res = await fn(*args, **kwargs)
+                    InstrumentContext.unset_workflow(workflow_name=wf_name)
 
                     try:
                         if _should_send_prompts():
@@ -342,7 +340,7 @@ def aworkflow_method(name: Optional[str] = None, correlation_id: Optional[str] =
 
 
 def aworkflow_class(
-        name: Optional[str], method_name: str, correlation_id: Optional[str] = None
+    name: Optional[str], method_name: str, run_id: Optional[str] = None
 ):
     def decorator(cls):
         workflow_name = name if name else camel_to_snake(cls.__name__)
@@ -350,7 +348,7 @@ def aworkflow_class(
         setattr(
             cls,
             method_name,
-            aworkflow_method(name=workflow_name, correlation_id=correlation_id)(method),
+            aworkflow_method(workflow_name=workflow_name, run_id=run_id)(method),
         )
         return cls
 

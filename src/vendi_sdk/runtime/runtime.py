@@ -8,10 +8,10 @@ from vendi_sdk.runtime.instrument import Instrument
 
 class Runtime:
     def __init__(
-            self,
-            url: str,
-            api_key: str,
-            project_id: str | None = None,
+        self,
+        url: str,
+        api_key: str,
+        project_id: str | None = None,
     ):
         self._project_id = project_id
         self._client = HttpClient(
@@ -25,10 +25,10 @@ class Runtime:
         self._aclient.set_auth_header(api_key)
 
     def get_task_config(
-            self,
-            project_id: str | None = None,
-            task_name: str | None = None,
-            tags: dict[str, Any] | None = None,
+        self,
+        project_id: str | None = None,
+        task_name: str | None = None,
+        tags: dict[str, Any] | None = None,
     ) -> dict:
         """
         Get the current runtime configuration
@@ -42,40 +42,44 @@ class Runtime:
         return _res
 
     def feedback(
-            self,
-            name: str,
-            id: str | int,
-            value: dict[str, Any],
-            project_id: str | None = None,
-            use_as_callback: bool = False,
+        self,
+        workflow_name: str,
+        run_id: str | int,
+        value: dict[str, Any],
+        project_id: str | None = None,
+        use_as_callback: bool = False,
     ):
         _project_id = project_id or self._project_id
         if not use_as_callback:
-            self._send_feedback(name, id, value, _project_id)
+            self._send_feedback(workflow_name, run_id, value, _project_id)
         else:
             # Create a new thread that will execute the request in the background
-            thread = threading.Thread(target=self._send_feedback, args=(name, id, value, _project_id))
+            thread = threading.Thread(target=self._send_feedback, args=(workflow_name, run_id, value, _project_id))
             thread.start()
 
-    def _send_feedback(self, name: str, id: str | int, value: dict[str, Any], project_id: str):
+    def _send_feedback(self, workflow_name: str, run_id: str | int, value: dict[str, Any], project_id: str):
         self._client.post(
             uri=f"/analytics-collector/{project_id}/feedback/",
             json_data={
-                "tag_name": name,
-                "tag_value": id,
+                "tag_name": workflow_name,
+                "tag_value": run_id,
                 "feedback": value
             }
         )
 
     async def afeedback(
-            self,
-            name: str,
-            id: str | int,
-            value: dict[str, Any],
-            project_id: str | None = None,
+        self,
+        workflow_name: str,
+        run_id: str | int,
+        value: dict[str, Any],
+        project_id: str | None = None,
     ):
         _project_id = project_id or self._project_id
         await self._aclient.post(
             path=f"/analytics-collector/{_project_id}/feedback",
-            json=value
+            json={
+                "tag_name": workflow_name,
+                "tag_value": run_id,
+                "feedback": value
+            }
         )

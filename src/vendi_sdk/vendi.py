@@ -11,29 +11,28 @@ from vendi_sdk.completions import Completions
 from vendi_sdk.runtime import Runtime
 from vendi_sdk.runtime.decorators import task, workflow
 from vendi_sdk.runtime.instrument import Instrument
-from vendi_sdk.runtime.feedback import Feedback
 import os
 
 VENDI_API_URL = vendi_config.VENDI_API_URL
 
 
 class Vendi:
+    instrument = Instrument
 
     def __init__(
-            self,
-            *,
-            api_url: str | None = None,
-            api_key: str | None = None,
-            project_id: str | None = None,
+        self,
+        *,
+        api_url: str | None = None,
+        api_key: str | None = None,
+        project_id: str | None = None,
     ):
         self._base_url = api_url or vendi_config.VENDI_API_URL
+        self.api_key = api_key or vendi_config.VENDI_API_KEY
 
-        if api_key:
-            self.api_key = api_key
-            # TODO: find a better way to set the api key for Instrument
-            os.environ['VENDI_API_KEY'] = api_key
-        else:
-            self.api_key = vendi_config.VENDI_API_KEY
+        if self.api_key:
+            self.instrument.api_key = self.api_key
+        if project_id:
+            self.instrument.project_id = project_id
 
         self._project_id = project_id
         self.models = Models(url=self._base_url, api_key=self.api_key)
@@ -42,7 +41,7 @@ class Vendi:
         self.completions = Completions(url=self._base_url, api_key=self.api_key)
         self.finetune = Finetune(url=self._base_url, api_key=self.api_key)
         self.runtime = Runtime(url=self._base_url, api_key=self.api_key, project_id=self._project_id)
-        self.instrument = Instrument
+
         self.task = task
         self.workflow = workflow
         self.feedback = self.runtime.feedback
