@@ -7,7 +7,7 @@ from traceloop.sdk.tracing.tracing import SimpleSpanProcessor
 
 
 def get_exporter(api_endpoint: str, headers: dict[str, str]) -> OTLPSpanExporter:
-    return OTLPSpanExporter(endpoint=f"{api_endpoint}/api/v1/traces", headers=headers)
+    return OTLPSpanExporter(endpoint=f"{api_endpoint}/api/v1/analytics-collector/activity", headers=headers)
 
 
 class InstrumentSpanProcessor(SimpleSpanProcessor):

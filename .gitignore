@@ -1,0 +1,15 @@
+.idea/
+__pycache__/
+.venv/
+domains/deployments/local/models/gguf/**
+tmp/**
+.DS_Store
+.env
+**.parquet
+**.csv
+.egg-info/
+dist/
+domains/platform-frontend/.env.production
+domains/platform-frontend/.env.development
+*.tgz
+domains/control-plane/.env.bck
