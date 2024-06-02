@@ -1,13 +1,12 @@
-import dataclasses
 import os
 import uuid
-from contextvars import Context
-from typing import Any, List, Dict
+from typing import Any
 
 from traceloop.sdk import Traceloop
 from opentelemetry.trace import get_current_span, NonRecordingSpan
 from opentelemetry.context import get_value, attach, set_value, get_current
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
+from .span_processer import InstrumentSpanProcessor, get_exporter
 import json
 import logging
 from opentelemetry.context.contextvars_context import ContextVarsRuntimeContext
@@ -158,7 +157,7 @@ class Instrument:
     def __init__(
         self,
         project_id: str | None = None,
-        api_endpoint: str = "https://api.vendi-ai.com/api",
+        api_endpoint: str = "https://api.vendi-ai.com",
         api_key: str = None,
         environment: str = None,
         tags: dict[str, Any] = None,
@@ -174,6 +173,7 @@ class Instrument:
 
         Traceloop.init(
             api_endpoint=api_endpoint,
+            processor=InstrumentSpanProcessor(get_exporter(api_endpoint, headers)),
             headers=headers,
             **kwargs
         )
