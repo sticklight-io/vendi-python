@@ -1,6 +1,6 @@
 [tool.poetry]
-name = "vendi"
-version = "0.1.24"
+name = "vendi-sdk"
+version = "0.1.1"
 description = ""
 authors = ["Aviv.a <aviv@vendi-ai.com>"]
 packages = [
