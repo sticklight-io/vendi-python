@@ -1,0 +1,11 @@
+.idea/
+__pycache__/
+.venv/
+tmp/**
+.DS_Store
+.env
+**.parquet
+**.csv
+.egg-info/
+dist/
+*.tgz
