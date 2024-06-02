@@ -41,7 +41,7 @@ class HttpClient:
     ) -> Any:
         _headers = self._set_headers(headers)
         url = self.__urljoin(uri)
-        res = requests.post(url, json=json_data, data=data, headers=_headers)
+        res = requests.post(url, json=json_data, data=data, headers=_headers, allow_redirects=True)
         return self.__handle_response(res)
 
     def _set_headers(self, headers: Dict[str, str]) -> Dict[str, str]:

@@ -4,7 +4,7 @@ from typing import Optional
 
 from pydantic import BaseModel, ConfigDict
 
-from vendi.core.schema import SchemaMixin
+from vendi_sdk.core.schema import SchemaMixin
 
 
 class TrainStatus(str, Enum):

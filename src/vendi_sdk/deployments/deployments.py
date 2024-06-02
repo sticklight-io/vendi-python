@@ -1,6 +1,6 @@
 from typing import List
 
-from vendi.core.http_client import HttpClient
+from vendi_sdk.core.http_client import HttpClient
 
 from .schema import Deployment, DeploymentStatus
 

@@ -4,8 +4,8 @@ from enum import Enum
 from typing import Optional, Literal
 from pydantic import BaseModel, model_validator, ConfigDict
 
-from vendi.core.schema import SchemaMixin
-from vendi.deployments.schema import DeploymentStatus
+from vendi_sdk.core.schema import SchemaMixin
+from vendi_sdk.deployments.schema import DeploymentStatus
 
 
 class ImageContentUrl(BaseModel):
