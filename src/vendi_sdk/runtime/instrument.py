@@ -27,6 +27,14 @@ def str_uuid():
     return str(uuid.uuid4())
 
 
+def turn_traceloop_off():
+    """
+    Turn off the traceloop telemetry and metrics
+    """
+    os.environ["TRACELOOP_TELEMETRY"] = "false"
+    os.environ["TRACELOOP_METRICS_ENABLED"] = "false"
+
+
 class Workflow(BaseModel):
     # instance_id: str = Field(default_factory=str_uuid)
     run_id: str | None = None
@@ -170,7 +178,7 @@ class Instrument:
             headers["Authorization"] = f"Bearer {vendi_api_key}"
         if project_id:
             headers[PROJECT_ID_HEADER] = str(project_id)
-
+        turn_traceloop_off()
         Traceloop.init(
             api_endpoint=api_endpoint,
             processor=InstrumentSpanProcessor(get_exporter(api_endpoint, headers)),

@@ -61,8 +61,8 @@ class Runtime:
         self._client.post(
             uri=f"/analytics-collector/{project_id}/feedback/",
             json_data={
-                "tag_name": workflow_name,
-                "tag_value": run_id,
+                "workflow_name": workflow_name,
+                "workflow_run_id": run_id,
                 "feedback": value
             }
         )
