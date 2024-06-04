@@ -17,7 +17,6 @@ pydantic-settings = "^2.1.0"
 pandas = "*"
 aiohttp = "^3.8.1"
 traceloop-sdk = "^0.17.3"
-openai = "^1.27.0"
 sentry-sdk = "^2.2.0"
 
 

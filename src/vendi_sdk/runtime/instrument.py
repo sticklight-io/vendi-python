@@ -99,11 +99,11 @@ class InstrumentContext(ContextVarsRuntimeContext):
 
     @classmethod
     def set_workflow_name(cls, workflow_name: str) -> None:
-        attach(set_value("workflow_name", workflow_name))
+        attach(set_value("_workflow_name", workflow_name))
 
     @classmethod
     def current_workflow_name(cls) -> str | None:
-        return get_value("workflow_name")
+        return get_value("_workflow_name")
 
     @classmethod
     def set_workflow(cls, name: str, run_id: Any | None = None, tags: dict[str, Any] | None = None) -> Workflow:
