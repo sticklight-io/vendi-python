@@ -1,3 +1,4 @@
+import logging
 from typing import Optional
 
 from opentelemetry import context as context_api

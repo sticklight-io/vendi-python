@@ -1,6 +1,6 @@
 import os
 import uuid
-from typing import Any
+from typing import Any, Set
 
 from traceloop.sdk import Traceloop
 from opentelemetry.trace import get_current_span, NonRecordingSpan
@@ -10,6 +10,7 @@ from .span_processer import InstrumentSpanProcessor, get_exporter
 import json
 import logging
 from opentelemetry.context.contextvars_context import ContextVarsRuntimeContext
+from traceloop.sdk.instruments import Instruments
 
 PROJECT_ID_HEADER = "X-Project-Id"
 PROJECT_ID = "project_id"
@@ -52,13 +53,7 @@ class Workflow(BaseModel):
 
 
 class InstrumentContext(ContextVarsRuntimeContext):
-    # @classmethod
-    # def validate_data(cls, data: List[Dict[str, Any]]) -> bool:
-    #     valid_types = (bool, str, bytes, int, float)
-    #     for item in data:
-    #         if not all(isinstance(value, valid_types) for value in item.values()):
-    #             return False
-    #     return True
+
     @classmethod
     def context_run_id(cls):
         _workflow = cls._get_workflow(cls.current_workflow_name())
@@ -158,6 +153,23 @@ class InstrumentContext(ContextVarsRuntimeContext):
         raise ValueError(f"Workflow {workflow_name} not found")
 
 
+DEFAULT_INSTRUMENTS = [
+    Instruments.OPENAI,
+    Instruments.ANTHROPIC,
+    Instruments.COHERE,
+    Instruments.PINECONE,
+    Instruments.CHROMA,
+    Instruments.LANGCHAIN,
+    Instruments.LLAMA_INDEX,
+    Instruments.TRANSFORMERS,
+    Instruments.BEDROCK,
+    Instruments.REPLICATE,
+    Instruments.VERTEXAI,
+    Instruments.WATSONX,
+    Instruments.WEAVIATE,
+]
+
+
 class Instrument:
     api_key: str | None = None
     project_id: str | None = None
@@ -169,6 +181,7 @@ class Instrument:
         api_key: str = None,
         environment: str = None,
         tags: dict[str, Any] = None,
+        instruments: Set[Instruments] | None = None,
         **kwargs
     ):
         vendi_api_key = api_key or self.api_key or os.getenv("VENDI_API_KEY")
@@ -183,6 +196,7 @@ class Instrument:
             api_endpoint=api_endpoint,
             processor=InstrumentSpanProcessor(get_exporter(api_endpoint, headers)),
             headers=headers,
+            instruments=instruments or DEFAULT_INSTRUMENTS,
             **kwargs
         )
 
