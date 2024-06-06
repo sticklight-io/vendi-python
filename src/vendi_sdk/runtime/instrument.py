@@ -6,6 +6,8 @@ from traceloop.sdk import Traceloop
 from opentelemetry.trace import get_current_span, NonRecordingSpan
 from opentelemetry.context import get_value, attach, set_value, get_current
 from pydantic import BaseModel
+
+from .constants import USER_KEY, WORKFLOW_KEY
 from .span_processer import InstrumentSpanProcessor, get_exporter
 import json
 import logging
@@ -17,7 +19,6 @@ PROJECT_ID = "project_id"
 TASK_NAME = "task_name"
 WORKFLOW_NAME = "workflow_name"
 ENVIRONMENT = "environment"
-WORKFLOW_KEY = "workflows"  # {"name": "chat": {"name": "chat", "run_id": "1234", "tags": {}}, "name": "chat2": {"name": "chat2", "run_id": "1234", "tags": {}}
 GLOBAL_WORKFLOW_KEY = "_global"
 PROPERTIES_KEY = "association_properties"
 
@@ -50,6 +51,16 @@ class Workflow(BaseModel):
     @classmethod
     def from_span_dict(cls, span_dict: dict[str, Any]) -> "Workflow":
         return Workflow(**span_dict)
+
+
+class User(BaseModel):
+    id: str
+
+    def to_span_dict(self) -> dict[str, Any]:
+        return self.model_dump()
+
+    def from_span_dict(cls, span_dict: dict[str, Any]) -> "User":
+        return User(**span_dict)
 
 
 class InstrumentContext(ContextVarsRuntimeContext):
@@ -111,6 +122,14 @@ class InstrumentContext(ContextVarsRuntimeContext):
             value=workflow.to_span_dict()
         )
         return workflow
+
+    @classmethod
+    def set_user(cls, user_id: str):
+        user = User(id=user_id)
+        cls._set_attribute(
+            attribute_key=USER_KEY,
+            value=user.to_span_dict()
+        )
 
     @classmethod
     def set_tags(cls, tags: dict[str, Any]):
