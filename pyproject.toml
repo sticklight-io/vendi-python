@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "vendi-sdk"
 version = "0.2.3"
-description = ""
+description = "Vendi SDK"
 authors = ["Aviv.a <aviv@vendi-ai.com>"]
 packages = [
     { include = "vendi_sdk", from = "src" },
