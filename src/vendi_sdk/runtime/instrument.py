@@ -115,7 +115,7 @@ class InstrumentContext(ContextVarsRuntimeContext):
     def set_workflow(cls, name: str, run_id: Any | None = None, tags: dict[str, Any] | None = None) -> Workflow:
         if not tags:
             tags = {}
-        workflow = Workflow(name=name, id=run_id, tags=tags)
+        workflow = Workflow(name=name, run_id=run_id, tags=tags)
         cls.set_workflow_name(name)
         cls._set_attribute(
             attribute_key=WORKFLOW_KEY,
@@ -225,7 +225,12 @@ class Instrument:
         if project_id:
             properties[PROJECT_ID] = project_id
         properties.update(tags or {})
-        InstrumentContext.set_workflow(name=GLOBAL_WORKFLOW_KEY, tags=properties)
+        InstrumentContext.set_workflow(
+            name=GLOBAL_WORKFLOW_KEY,
+            run_id=str_uuid(),
+            tags=properties
+        )
+        print()
 
 
 def get_context() -> InstrumentContext:
